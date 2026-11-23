@@ -1,17 +1,17 @@
-deckstack-lights test run 2026-11-23T20:30:31
+deckstack-lights test run 2026-11-23T20:39:17
 binaries: /var/home/catwars/repos/deckstack/target/debug
 ds-plugin-py SDK root: /var/home/catwars/repos/deckstack/plugins-py
 PASS  manifest.json validates against schemas/plugin-manifest.json (jsonschema draft 2020-12)
 PASS  capabilities: net grants = ['net:lights.lan'] only; plugin id 'lights', action 'set' -> invoked as lights.set
-fake HueMux on 127.0.0.1:44335 (lights.lan)
-installed plugin into /var/mnt/c3d38e3d-6510-48f2-a54a-4ab9633fd241/ai/tmp/ds-070-lights-a400ll34/xdg/deckstack/plugins/lights
-$ ds daemon start --device virtual:/var/mnt/c3d38e3d-6510-48f2-a54a-4ab9633fd241/ai/tmp/ds-070-lights-a400ll34/vdev.sock --data-dir /var/mnt/c3d38e3d-6510-48f2-a54a-4ab9633fd241/ai/tmp/ds-070-lights-a400ll34/data  -> rc=0 (control socket /var/mnt/c3d38e3d-6510-48f2-a54a-4ab9633fd241/ai/tmp/ds-070-lights-a400ll34/data/daemon.sock)
+fake HueMux on 127.0.0.1:33329 (lights.lan)
+installed plugin into /var/mnt/c3d38e3d-6510-48f2-a54a-4ab9633fd241/ai/tmp/ds-070-lights-osn9rd1u/xdg/deckstack/plugins/lights
+$ ds daemon start --device virtual:/var/mnt/c3d38e3d-6510-48f2-a54a-4ab9633fd241/ai/tmp/ds-070-lights-osn9rd1u/vdev.sock --data-dir /var/mnt/c3d38e3d-6510-48f2-a54a-4ab9633fd241/ai/tmp/ds-070-lights-osn9rd1u/data  -> rc=0 (control socket /var/mnt/c3d38e3d-6510-48f2-a54a-4ab9633fd241/ai/tmp/ds-070-lights-osn9rd1u/data/daemon.sock)
 $ ds bind app/lights/boot --do plugin lights.set {"room":"salon","light":"ceiling","on":true}
   # bind app/lights/boot
   rc=0
   stdout: ok rev=1 id=b0001
   emitted app/lights/boot -> {"id": 100, "ok": true, "result": {"emitted": "app/lights/boot", "subscribers": 1}}
-plugin lights status=running pid=1182454
+plugin lights status=running pid=1201539
 $ ds get /plugins/lights --json
   # get /plugins/lights
   rc=0
@@ -94,7 +94,7 @@ $ ds set /policy/net/allow_hosts --json ["lights.lan"]
   "rev": 5
 }
 PASS  deployment policy as data: /policy/net/allow_hosts = ["lights.lan"]
-$ ds set /plugins/lights/config --json {"bridge_host": "lights.lan", "bridge_port": 44335, "allow_rooms": ["salon", "kitchen"]}
+$ ds set /plugins/lights/config --json {"bridge_host": "lights.lan", "bridge_port": 33329, "allow_rooms": ["salon", "kitchen"]}
   # set plugin config at /plugins/lights/config
   rc=0
   stdout: {
@@ -108,7 +108,7 @@ $ ds bind app/lights/ticket-path --do plugin lights.set {"room":"salon","light":
   emitted app/lights/ticket-path -> {"id": 100, "ok": true, "result": {"emitted": "app/lights/ticket-path", "subscribers": 1}}
   /plugins/lights/config honoured: invoke succeeded via it
 PASS  documented config path /plugins/lights/config is honoured when present
-$ ds set /plugins/lights/state/config --json {"bridge_host": "lights.lan", "bridge_port": 44335, "allow_rooms": ["salon", "kitchen"]}
+$ ds set /plugins/lights/state/config --json {"bridge_host": "lights.lan", "bridge_port": 33329, "allow_rooms": ["salon", "kitchen"]}
   # set plugin config at /plugins/lights/state/config
   rc=0
   stdout: {
@@ -121,9 +121,9 @@ $ ds bind app/lights/set-ok --do plugin lights.set {"room":"salon","light":"ceil
   stdout: ok rev=11 id=b0003
   emitted app/lights/set-ok -> {"id": 100, "ok": true, "result": {"emitted": "app/lights/set-ok", "subscribers": 1}}
   fake HueMux saw: GET /api/lights/set?{'room': 'salon', 'light': 'ceiling', 'on': 'true', 'brightness': '80', 'color': '#ff8800'}
-  /plugins/lights/state/last = {"action": "lights.set", "args": {"brightness": 80, "color": "#ff8800", "light": "ceiling", "on": true, "room": "salon"}, "bridge": "lights.lan:44335", "http_status": 200, "response": {"light": "ceiling", "ok": true, "room": "salon", "state": {"brightness": 80, "color": "#ff8800", "on": true}}}
+  /plugins/lights/state/last = {"action": "lights.set", "args": {"brightness": 80, "color": "#ff8800", "light": "ceiling", "on": true, "room": "salon"}, "bridge": "lights.lan:33329", "http_status": 200, "response": {"light": "ceiling", "ok": true, "room": "salon", "state": {"brightness": 80, "color": "#ff8800", "on": true}}}
 PASS  lights.set success: mediated GET reached the fake HueMux, result recorded, stats clean
-$ ds set /plugins/lights/state/config --json {"bridge_host": "lights.lan", "bridge_port": 44335, "allow_rooms": ["salon", "kitchen"]}
+$ ds set /plugins/lights/state/config --json {"bridge_host": "lights.lan", "bridge_port": 33329, "allow_rooms": ["salon", "kitchen"]}
   # set plugin config at /plugins/lights/state/config
   rc=0
   stdout: {
@@ -141,7 +141,7 @@ $ ds bind app/lights/set-color-off --do plugin lights.set {"room":"salon","light
   stdout: ok rev=18 id=b0005
   emitted app/lights/set-color-off -> {"id": 100, "ok": true, "result": {"emitted": "app/lights/set-color-off", "subscribers": 1}}
 PASS  lights.set partial args (brightness only; color + on=false) map to the query exactly
-$ ds set /plugins/lights/state/config --json {"bridge_host": "lights.lan", "bridge_port": 44335, "allow_rooms": ["salon", "kitchen"]}
+$ ds set /plugins/lights/state/config --json {"bridge_host": "lights.lan", "bridge_port": 33329, "allow_rooms": ["salon", "kitchen"]}
   # set plugin config at /plugins/lights/state/config
   rc=0
   stdout: {
@@ -155,7 +155,7 @@ $ ds bind app/lights/set-attic --do plugin lights.set {"room":"attic","light":"l
   emitted app/lights/set-attic -> {"id": 100, "ok": true, "result": {"emitted": "app/lights/set-attic", "subscribers": 1}}
   refusal recorded in /plugins/lights/state/last: {"code": "E_CAP", "message": "room 'attic' is not in allow_rooms ['salon', 'kitchen'] (deployment policy at /plugins/lights/config/allow_rooms)"}
 PASS  allow_rooms refusal: room 'attic' -> E_CAP recorded, no request hit the bridge
-$ ds set /plugins/lights/state/config --json {"bridge_host": "lights.lan.evil.com", "bridge_port": 44335, "allow_rooms": ["salon", "kitchen"]}
+$ ds set /plugins/lights/state/config --json {"bridge_host": "lights.lan.evil.com", "bridge_port": 33329, "allow_rooms": ["salon", "kitchen"]}
   # set plugin config at /plugins/lights/state/config
   rc=0
   stdout: {
@@ -168,7 +168,7 @@ $ ds bind app/lights/glob-0 --do plugin lights.set {"room":"salon","light":"ceil
   stdout: ok rev=26 id=b0007
   emitted app/lights/glob-0 -> {"id": 100, "ok": true, "result": {"emitted": "app/lights/glob-0", "subscribers": 1}}
   lights.lan.evil.com  -> daemon refused E_CAP (host "lights.lan.evil.com" is not granted by any net:<glob>) [violations 0->1]
-$ ds set /plugins/lights/state/config --json {"bridge_host": "lan", "bridge_port": 44335, "allow_rooms": ["salon", "kitchen"]}
+$ ds set /plugins/lights/state/config --json {"bridge_host": "lan", "bridge_port": 33329, "allow_rooms": ["salon", "kitchen"]}
   # set plugin config at /plugins/lights/state/config
   rc=0
   stdout: {
@@ -181,7 +181,7 @@ $ ds bind app/lights/glob-1 --do plugin lights.set {"room":"salon","light":"ceil
   stdout: ok rev=31 id=b0008
   emitted app/lights/glob-1 -> {"id": 100, "ok": true, "result": {"emitted": "app/lights/glob-1", "subscribers": 1}}
   lan                  -> daemon refused E_CAP (host "lan" is not granted by any net:<glob>) [violations 1->2]
-$ ds set /plugins/lights/state/config --json {"bridge_host": "a.b.lan", "bridge_port": 44335, "allow_rooms": ["salon", "kitchen"]}
+$ ds set /plugins/lights/state/config --json {"bridge_host": "a.b.lan", "bridge_port": 33329, "allow_rooms": ["salon", "kitchen"]}
   # set plugin config at /plugins/lights/state/config
   rc=0
   stdout: {
@@ -194,7 +194,7 @@ $ ds bind app/lights/glob-2 --do plugin lights.set {"room":"salon","light":"ceil
   stdout: ok rev=36 id=b0009
   emitted app/lights/glob-2 -> {"id": 100, "ok": true, "result": {"emitted": "app/lights/glob-2", "subscribers": 1}}
   a.b.lan              -> daemon refused E_CAP (host "a.b.lan" is not granted by any net:<glob>) [violations 2->3]
-$ ds set /plugins/lights/state/config --json {"bridge_host": "x.lights.lan", "bridge_port": 44335, "allow_rooms": ["salon", "kitchen"]}
+$ ds set /plugins/lights/state/config --json {"bridge_host": "x.lights.lan", "bridge_port": 33329, "allow_rooms": ["salon", "kitchen"]}
   # set plugin config at /plugins/lights/state/config
   rc=0
   stdout: {
@@ -207,7 +207,7 @@ $ ds bind app/lights/glob-3 --do plugin lights.set {"room":"salon","light":"ceil
   stdout: ok rev=41 id=b0010
   emitted app/lights/glob-3 -> {"id": 100, "ok": true, "result": {"emitted": "app/lights/glob-3", "subscribers": 1}}
   x.lights.lan         -> daemon refused E_CAP (host "x.lights.lan" is not granted by any net:<glob>) [violations 3->4]
-$ ds set /plugins/lights/state/config --json {"bridge_host": "lights.lan", "bridge_port": 44335, "allow_rooms": ["salon", "kitchen"]}
+$ ds set /plugins/lights/state/config --json {"bridge_host": "lights.lan", "bridge_port": 33329, "allow_rooms": ["salon", "kitchen"]}
   # set plugin config at /plugins/lights/state/config
   rc=0
   stdout: {
@@ -227,7 +227,7 @@ $ ds set /policy/net/allow_hosts --json ["other.host"]
   "ok": true,
   "rev": 49
 }
-$ ds set /plugins/lights/state/config --json {"bridge_host": "lights.lan", "bridge_port": 44335, "allow_rooms": ["salon", "kitchen"]}
+$ ds set /plugins/lights/state/config --json {"bridge_host": "lights.lan", "bridge_port": 33329, "allow_rooms": ["salon", "kitchen"]}
   # set plugin config at /plugins/lights/state/config
   rc=0
   stdout: {
@@ -241,7 +241,7 @@ $ ds bind app/lights/policy --do plugin lights.set {"room":"salon","light":"ceil
   emitted app/lights/policy -> {"id": 100, "ok": true, "result": {"emitted": "app/lights/policy", "subscribers": 1}}
   daemon refused via /policy/net/allow_hosts: {"code": "E_CAP", "message": "host \"lights.lan\" is not in /policy/net/allow_hosts"}
 PASS  policy layer: lights.lan not in /policy/net/allow_hosts -> E_CAP from the daemon's allow_hosts check
-$ ds set /plugins/lights/state/config --json {"bridge_host": "lights.lan", "bridge_port": 44335, "allow_rooms": ["salon", "kitchen"]}
+$ ds set /plugins/lights/state/config --json {"bridge_host": "lights.lan", "bridge_port": 33329, "allow_rooms": ["salon", "kitchen"]}
   # set plugin config at /plugins/lights/state/config
   rc=0
   stdout: {
