@@ -1,0 +1,28 @@
+{
+  "id": "lights",
+  "name": "lights.lan bridge (HueMux)",
+  "version": "0.1.0",
+  "description": "lights.lan integration (DS-070): lights.set {room, light, on, brightness, color} over host-mediated HTTP; the only network capability is net:lights.lan; no scenes/presets shipped. Install with make_manifest.py, which regenerates this file with command/fs_roots/resources resolved for the local machine (the register message must equal the on-disk manifest, contract plugins.md §9).",
+  "command": ["/usr/bin/python3", "plugin.py"],
+  "actions": [
+    {
+      "id": "set",
+      "name": "lights.set",
+      "description": "Set a light in a room on the lights.lan HueMux bridge {room, light, on?, brightness? 0-100, color? '#rrggbb'} — host-mediated HTTP only (net:lights.lan).",
+      "params": {
+        "type": "object",
+        "properties": {
+          "room": {"type": "string", "minLength": 1, "maxLength": 64, "pattern": "^[A-Za-z0-9_-]{1,64}$"},
+          "light": {"type": "string", "minLength": 1, "maxLength": 64, "pattern": "^[A-Za-z0-9_-]{1,64}$"},
+          "on": {"type": "boolean"},
+          "brightness": {"type": "integer", "minimum": 0, "maximum": 100},
+          "color": {"type": "string", "pattern": "^#[0-9a-fA-F]{6}$"}
+        },
+        "required": ["room", "light"],
+        "additionalProperties": false
+      }
+    }
+  ],
+  "capabilities": ["state.read", "state.write", "net:lights.lan"],
+  "resources": {"cpu_s": 10, "nproc": 64, "nofile": 64, "as_mb": 1024}
+}
