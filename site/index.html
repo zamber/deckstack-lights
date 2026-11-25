@@ -100,7 +100,7 @@
           <text class="node-sub" x="797" y="116">+ /policy/net/allow_hosts</text>
         </g>
       </svg>
-      <p class="diagram-caption">key press → binding step → plugin host → plugin process → sdk.http → policy check → HueMux → light. The policy check runs inside the daemon: it matches the URL host against the <code>net:lights.lan</code> grant and <code>/policy/net/allow_hosts</code>, then performs the HTTP request itself. The plugin never opens a socket.</p>
+      <p class="diagram-caption">A key press becomes a binding step, then the plugin host, the plugin process, an sdk.http request, the policy check, HueMux and the light. The policy check runs inside the daemon: it matches the URL host against the <code>net:lights.lan</code> grant and <code>/policy/net/allow_hosts</code>, then performs the HTTP request itself. The plugin never opens a socket.</p>
     </div>
 
     <h2 id="manifest">The manifest</h2>
@@ -220,7 +220,7 @@ ds get /plugins/lights --json              # {manifest, status, state, stats}</c
     request, so the tests can assert exactly what the plugin asked the bridge
     to do, including that a refused room never produced a request. The run is
     hermetic: the suite re-execs itself in a user+mount namespace with a private
-    <code>/etc/hosts</code> mapping <code>lights.lan</code> → 127.0.0.1. It
+    <code>/etc/hosts</code> mapping <code>lights.lan</code> to 127.0.0.1. It
     covers manifest schema validation, boot to <code>running</code>,
     <code>lights.set</code> success and partial args, the <code>allow_rooms</code>
     refusal, the net glob edge matrix, the <code>/policy/net/allow_hosts</code>

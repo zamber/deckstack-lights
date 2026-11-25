@@ -112,7 +112,7 @@ Stdlib only. The suite boots the real `ds-vdev` and `ds-daemon`, installs the
 plugin, and points it at a fake HueMux bridge (`tests/fake_humux.py`, a stdlib
 HTTP server on 127.0.0.1 that records every request). It re-execs itself in an
 unprivileged user+mount namespace with a private `/etc/hosts` mapping
-`lights.lan` → 127.0.0.1, so the run is hermetic. It covers: manifest schema
+`lights.lan` to 127.0.0.1, so the run is hermetic. It covers: manifest schema
 validation, plugin boot to `running`, `lights.set` success (full and partial
 args, asserting the exact query the bridge received), `allow_rooms` refusal
 with no bridge request, the net glob edge matrix. The daemon refuses `lights.lan.evil.com` with
