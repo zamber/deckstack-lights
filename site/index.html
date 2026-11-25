@@ -42,10 +42,10 @@
     spelled out in its manifest:</p>
     <ul class="feature-list">
       <li><strong>A normal process.</strong> The host spawns it from the manifest's <code>command</code>. It has no HID access and no ambient authority. It cannot even open a socket.</li>
-      <li><strong>Newline-delimited JSON on stdio.</strong> The host speaks the plugin wire protocol to it. Every side effect the plugin wants (read state, write state, do HTTP) is a request the host may refuse.</li>
+      <li><strong>Newline-delimited JSON on stdio.</strong> The host speaks the plugin wire protocol to it. Every side effect the plugin wants is a request the host may refuse. That includes reading state, writing state and making HTTP requests.</li>
       <li><strong>One network grant.</strong> <code>net:lights.lan</code>. The daemon checks the URL host against that grant <em>and</em> <code>/policy/net/allow_hosts</code> before it makes the request itself.</li>
       <li><strong>Validated parameters.</strong> The action.s params are a JSON Schema, and the daemon validates them before the plugin runs.</li>
-      <li><strong>Config as data.</strong> Read from <code>/plugins/lights/config</code> (or the durable <code>/plugins/lights/state/config</code>), so a room allowlist is deployment policy, not code.</li>
+      <li><strong>Config as data.</strong> Read from <code>/plugins/lights/config</code> when present, or from the durable <code>/plugins/lights/state/config</code>. A room allowlist is deployment policy, not code.</li>
     </ul>
 
     <h2 id="how">How a key press reaches a light</h2>
@@ -117,7 +117,7 @@
     {
       "id": "set",
       "name": "lights.set",
-      "description": "Set a light in a room on the lights.lan HueMux bridge {room, light, on?, brightness? 0-100, color? '#rrggbb'} . Host-mediated HTTP only (net:lights.lan).",
+  "description": "Set a light in a room on the lights.lan HueMux bridge {room, light, on?, brightness? 0-100, color? '#rrggbb'}. Host-mediated HTTP only, with the single net:lights.lan grant.",
       "params": { "…": "JSON Schema, see below" }
     }
   ],
@@ -129,7 +129,7 @@
 
     <h2 id="action">The action: lights.set</h2>
     <p>One action, with JSON-Schema params the daemon validates
-    (<code>E_SCHEMA</code>) before the plugin runs:</p>
+    <p>One action, with JSON-Schema params. The daemon validates them before the plugin runs and refuses a bad value with <code>E_SCHEMA</code>:</p>
     <div class="table-scroll">
     <table>
       <tr><th>param</th><th>type</th><th>required</th><th>notes</th></tr>
@@ -165,20 +165,20 @@
     </table>
     </div>
     <p><code>net:lights.lan</code> is the plugin's sole network capability, and
-    it is still not enough on its own: the daemon additionally checks the URL
+    it is still not enough on its own: the daemon also checks the URL
     host against <code>/policy/net/allow_hosts</code> before performing the
     request. The glob is anchored and <code>*</code> matches exactly one DNS
     label, so the grant allows <code>lights.lan</code> only. It refuses
     <code>lights.lan.evil.com</code>, <code>lan</code>, <code>a.b.lan</code>,
-    <code>x.lights.lan</code> with <code>E_CAP</code> (counted in
-    <code>stats.violations</code>). The request goes out as
+    <code>x.lights.lan</code> with <code>E_CAP</code>. Each refusal is counted
+    in <code>stats.violations</code>. The request goes out as
     <code>sdk.http("GET", url)</code>. Request kind <code>"net"</code>.
     answered by the daemon, which resolves DNS and connects itself. The plugin
     process never opens a socket.</p>
 
     <h2 id="config">Config as data</h2>
     <p>The plugin reads its config on every invoke. It reads <code>/plugins/lights/config</code>
-    when present (the documented location), else the durable plugin-owned
+    when present, or from the durable plugin-owned
     <code>/plugins/lights/state/config</code>. Room and light ids are never
     hardcoded. The allowlist is deployment policy:</p>
 <pre><code>ds set /policy/net/allow_hosts --json '["lights.lan"]'

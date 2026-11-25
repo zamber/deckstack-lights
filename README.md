@@ -4,7 +4,7 @@ deckstack-lights is a reference [deckstack](https://github.com/zamber/deckstack)
 plugin that drives the lights on a **lights.lan** [HueMux](https://github.com/zamber/huemux)
 bridge. It proves the plugin model end to end: a plugin is a separate OS process
 with a manifest, exposing one action, and every side effect, including all
-network I/O, is mediated by the deckstack host. The plugin itself has no HID
+network requests, is mediated by the deckstack host. The plugin itself has no HID
 access, no ambient authority, and never opens a socket.
 
 ## Layout
@@ -30,9 +30,9 @@ The plugin needs the `ds-plugin-py` SDK, either pip-installed once published:
 ```sh
 pip install ds-plugin-py
 ```
-
-or from a checkout of the deckstack repository next to this one
-(the sibling `../deckstack/plugins-py` checkout, or `$DS_PLUGIN_PY_ROOT`).
+or from a checkout of the deckstack repository next to this one. Point
+`DS_PLUGIN_PY_ROOT` at its `plugins-py` directory, or use the sibling
+`../deckstack/plugins-py` checkout.
 
 Then install the plugin into the daemon's plugin dir (today.s install path is
 a copy plus a generated manifest, and `ds plugin install` is a planned verb):
@@ -115,7 +115,7 @@ unprivileged user+mount namespace with a private `/etc/hosts` mapping
 `lights.lan` → 127.0.0.1, so the run is hermetic. It covers: manifest schema
 validation, plugin boot to `running`, `lights.set` success (full and partial
 args, asserting the exact query the bridge received), `allow_rooms` refusal
-with no bridge request, the net glob edge matrix (`lights.lan.evil.com` etc. →
+with no bridge request, the net glob edge matrix. The daemon refuses `lights.lan.evil.com` with
 `E_CAP` from the daemon's grant check), the `/policy/net/allow_hosts` layer,
 params-schema refusals, and cleanup. It requires the prebuilt deckstack
 binaries (from `../deckstack/target/debug`, or `DS_BIN_DIR`). The transcript of
