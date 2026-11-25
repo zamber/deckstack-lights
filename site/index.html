@@ -8,6 +8,17 @@
   <meta name="theme-color" content="#f7f3ea" media="(prefers-color-scheme: light)">
   <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <meta name="darkreader-lock" content="true">
+  <script>
+    (function () {
+      try {
+        var saved = localStorage.getItem("deckstack-theme");
+        if (saved === "dark" || saved === "light") {
+          document.documentElement.dataset.theme = saved;
+        }
+      } catch (error) {}
+    })();
+  </script>
   <link rel="stylesheet" href="assets/css/style.css">
 </head>
 <body>
@@ -19,6 +30,12 @@
       <a href="#how">How it works</a>
       <a href="#install">Install</a>
       <a href="#tests">Tests</a>
+      <button class="theme-toggle" type="button" aria-label="Switch to dark theme" title="Switch theme">
+        <svg viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+          <circle cx="8" cy="8" r="6.6" fill="none" stroke="currentColor" stroke-width="1.2"/>
+          <path d="M8 1.4a6.6 6.6 0 0 0 0 13.2z" fill="currentColor"/>
+        </svg>
+      </button>
     </nav>
   </header>
 
@@ -234,5 +251,6 @@ ds get /plugins/lights --json              # {manifest, status, state, stats}</c
     <a href="https://zamber.github.io/deckstack/">deckstack</a> ·
     <a href="https://github.com/zamber/huemux">HueMux</a>
   </footer>
+  <script src="assets/js/theme.js" defer></script>
 </body>
 </html>
