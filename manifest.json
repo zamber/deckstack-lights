@@ -2,7 +2,7 @@
   "id": "lights",
   "name": "lights.lan bridge (HueMux)",
   "version": "0.1.0",
-  "description": "lights.lan integration (DS-070): lights.set {room, light, on, brightness, color} over host-mediated HTTP; the only network capability is net:lights.lan; no scenes/presets shipped. Install with make_manifest.py, which regenerates this file with command/fs_roots/resources resolved for the local machine (the register message must equal the on-disk manifest, contract plugins.md §9).",
+  "description": "lights.set {room, light, on, brightness, color} on the lights.lan HueMux bridge over host-mediated HTTP; the only network capability is net:lights.lan.",
   "command": ["/usr/bin/python3", "plugin.py"],
   "actions": [
     {

@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>deckstack-lights</title>
+  <meta name="description" content="A reference deckstack plugin that drives lights on a lights.lan HueMux bridge: a normal process, a manifest, one action, and host-mediated HTTP only.">
+  <meta name="theme-color" content="#f7f3ea" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+  <header class="site-header">
+    <a class="brand" href="index.html">deckstack-lights</a>
+    <nav>
+      <a href="https://github.com/zamber/deckstack-lights">GitHub</a>
+      <a href="https://zamber.github.io/deckstack/">deckstack</a>
+      <a href="#how">How it works</a>
+      <a href="#install">Install</a>
+      <a href="#tests">Tests</a>
+    </nav>
+  </header>
+
+  <main>
+    <h1>deckstack-lights</h1>
+    <p class="tagline">A reference <a href="https://github.com/zamber/deckstack">deckstack</a>
+    plugin that drives the lights on a <strong>lights.lan</strong>
+    <a href="https://github.com/zamber/huemux">HueMux</a> bridge. It is a normal process,
+    a manifest, one action, and host-mediated HTTP only.</p>
+
+    <p class="pill-links">
+      <a href="https://github.com/zamber/deckstack-lights">View source on GitHub</a>
+      <a href="https://github.com/zamber/deckstack-lights#readme">Read the README</a>
+      <a href="https://zamber.github.io/deckstack/">deckstack site</a>
+      <a href="https://github.com/zamber/huemux">HueMux</a>
+    </p>
+
+    <h2>What a plugin gets</h2>
+    <p>A deckstack plugin is not a library and not a daemon extension. It is an
+    ordinary OS process that the host starts, and everything it can do is
+    spelled out in its manifest:</p>
+    <ul class="feature-list">
+      <li><strong>A normal process.</strong> The host spawns it from the manifest's <code>command</code>. It has no HID access and no ambient authority. It cannot even open a socket.</li>
+      <li><strong>Newline-delimited JSON on stdio.</strong> The host speaks the plugin wire protocol to it. Every side effect the plugin wants (read state, write state, do HTTP) is a request the host may refuse.</li>
+      <li><strong>One network grant.</strong> <code>net:lights.lan</code>. The daemon checks the URL host against that grant <em>and</em> <code>/policy/net/allow_hosts</code> before it makes the request itself.</li>
+      <li><strong>Validated parameters.</strong> The action.s params are a JSON Schema, and the daemon validates them before the plugin runs.</li>
+      <li><strong>Config as data.</strong> Read from <code>/plugins/lights/config</code> (or the durable <code>/plugins/lights/state/config</code>), so a room allowlist is deployment policy, not code.</li>
+    </ul>
+
+    <h2 id="how">How a key press reaches a light</h2>
+    <p>The host mediates every hop. The plugin process only ever asks. The
+    daemon decides and acts:</p>
+    <div class="diagram">
+      <svg viewBox="0 0 1160 150" role="img" aria-label="Sequence diagram: key press, binding step, plugin host, plugin process, sdk.http, policy check, HueMux, light">
+        <!-- nodes: 8 boxes, x = 10 + i*145, w=124, y=30, h=46 -->
+        <g>
+          <rect class="node-box" x="10"   y="30" width="124" height="46" rx="8"/>
+          <rect class="node-box" x="155"  y="30" width="124" height="46" rx="8"/>
+          <rect class="node-box" x="300"  y="30" width="124" height="46" rx="8"/>
+          <rect class="node-box" x="445"  y="30" width="124" height="46" rx="8"/>
+          <rect class="node-box" x="590"  y="30" width="124" height="46" rx="8"/>
+          <rect class="node-accent" x="735" y="30" width="124" height="46" rx="8"/>
+          <rect class="node-box" x="880"  y="30" width="124" height="46" rx="8"/>
+          <rect class="node-box" x="1025" y="30" width="124" height="46" rx="8"/>
+        </g>
+        <!-- arrows -->
+        <g>
+          <line class="flow" x1="134" y1="53" x2="150" y2="53"/><polygon class="flow-head" points="150,53 143,49.5 143,56.5"/>
+          <line class="flow" x1="279" y1="53" x2="295" y2="53"/><polygon class="flow-head" points="295,53 288,49.5 288,56.5"/>
+          <line class="flow" x1="424" y1="53" x2="440" y2="53"/><polygon class="flow-head" points="440,53 433,49.5 433,56.5"/>
+          <line class="flow" x1="569" y1="53" x2="585" y2="53"/><polygon class="flow-head" points="585,53 578,49.5 578,56.5"/>
+          <line class="flow" x1="714" y1="53" x2="730" y2="53"/><polygon class="flow-head" points="730,53 723,49.5 723,56.5"/>
+          <line class="flow" x1="859" y1="53" x2="875" y2="53"/><polygon class="flow-head" points="875,53 868,49.5 868,56.5"/>
+          <line class="flow" x1="1004" y1="53" x2="1020" y2="53"/><polygon class="flow-head" points="1020,53 1013,49.5 1013,56.5"/>
+        </g>
+        <!-- labels -->
+        <g text-anchor="middle">
+          <text class="node-text" x="72"   y="57" dominant-baseline="middle">key press</text>
+          <text class="node-text" x="217"  y="57" dominant-baseline="middle">binding step</text>
+          <text class="node-text" x="362"  y="57" dominant-baseline="middle">plugin host</text>
+          <text class="node-text" x="507"  y="57" dominant-baseline="middle">plugin process</text>
+          <text class="node-text" x="652"  y="57" dominant-baseline="middle">sdk.http</text>
+          <text class="node-text" x="797"  y="57" dominant-baseline="middle">policy check</text>
+          <text class="node-text" x="942"  y="57" dominant-baseline="middle">HueMux</text>
+          <text class="node-text" x="1087" y="57" dominant-baseline="middle">light</text>
+        </g>
+        <!-- sub-labels -->
+        <g text-anchor="middle">
+          <text class="node-sub" x="72"   y="100">deck/control/keys.0/down</text>
+          <text class="node-sub" x="217"  y="100">ds bind --do</text>
+          <text class="node-sub" x="362"  y="100">ds-daemon</text>
+          <text class="node-sub" x="507"  y="100">python3 plugin.py</text>
+          <text class="node-sub" x="652"  y="100">request kind "net"</text>
+          <text class="node-sub" x="797"  y="100">net:lights.lan</text>
+          <text class="node-sub" x="942"  y="100">lights.lan:80</text>
+          <text class="node-sub" x="1087" y="100">state applied</text>
+        </g>
+        <g text-anchor="middle">
+          <text class="node-sub" x="797" y="116">+ /policy/net/allow_hosts</text>
+        </g>
+      </svg>
+      <p class="diagram-caption">key press → binding step → plugin host → plugin process → sdk.http → policy check → HueMux → light. The policy check runs inside the daemon: it matches the URL host against the <code>net:lights.lan</code> grant and <code>/policy/net/allow_hosts</code>, then performs the HTTP request itself. The plugin never opens a socket.</p>
+    </div>
+
+    <h2 id="manifest">The manifest</h2>
+    <p>Everything the host needs to know about the plugin is declared in
+    <code>manifest.json</code>. It holds identity, launch command, capabilities,
+    actions:</p>
+<pre><code>{
+  "id": "lights",
+  "name": "lights.lan bridge (HueMux)",
+  "version": "0.1.0",
+  "description": "lights.set {room, light, on, brightness, color} on the lights.lan HueMux bridge over host-mediated HTTP. The only network capability is net:lights.lan.",
+  "command": ["/usr/bin/python3", "plugin.py"],
+  "actions": [
+    {
+      "id": "set",
+      "name": "lights.set",
+      "description": "Set a light in a room on the lights.lan HueMux bridge {room, light, on?, brightness? 0-100, color? '#rrggbb'} . Host-mediated HTTP only (net:lights.lan).",
+      "params": { "…": "JSON Schema, see below" }
+    }
+  ],
+  "capabilities": ["state.read", "state.write", "net:lights.lan"],
+  "resources": {"cpu_s": 10, "nproc": 64, "nofile": 64, "as_mb": 1024}
+}</code></pre>
+    <p>The daemon schema-validates this file when it spawns the plugin, and
+    requires the plugin's register message to equal it.</p>
+
+    <h2 id="action">The action: lights.set</h2>
+    <p>One action, with JSON-Schema params the daemon validates
+    (<code>E_SCHEMA</code>) before the plugin runs:</p>
+    <div class="table-scroll">
+    <table>
+      <tr><th>param</th><th>type</th><th>required</th><th>notes</th></tr>
+      <tr><td><code>room</code></td><td>string</td><td>yes</td><td>1 to 64 chars, <code>[A-Za-z0-9_-]</code></td></tr>
+      <tr><td><code>light</code></td><td>string</td><td>yes</td><td>same charset</td></tr>
+      <tr><td><code>on</code></td><td>boolean</td><td>no</td><td>on / off</td></tr>
+      <tr><td><code>brightness</code></td><td>integer</td><td>no</td><td>0 to 100</td></tr>
+      <tr><td><code>color</code></td><td>string</td><td>no</td><td><code>#rrggbb</code></td></tr>
+    </table>
+    </div>
+<pre><code>"params": {
+  "type": "object",
+  "properties": {
+    "room":       {"type": "string", "minLength": 1, "maxLength": 64,
+                   "pattern": "^[A-Za-z0-9_-]{1,64}$"},
+    "light":      {"type": "string", "minLength": 1, "maxLength": 64,
+                   "pattern": "^[A-Za-z0-9_-]{1,64}$"},
+    "on":         {"type": "boolean"},
+    "brightness": {"type": "integer", "minimum": 0, "maximum": 100},
+    "color":      {"type": "string", "pattern": "^#[0-9a-fA-F]{6}$"}
+  },
+  "required": ["room", "light"],
+  "additionalProperties": false
+}</code></pre>
+
+    <h2 id="capabilities">Capabilities</h2>
+    <div class="table-scroll">
+    <table>
+      <tr><th>capability</th><th>what it grants</th></tr>
+      <tr><td><code>state.read</code></td><td>read plugin state, e.g. <code>/plugins/lights/config</code></td></tr>
+      <tr><td><code>state.write</code></td><td>record results under <code>/plugins/lights/state</code></td></tr>
+      <tr><td><code>net:lights.lan</code></td><td>the only network grant: host-mediated HTTP, and only to <code>lights.lan</code></td></tr>
+    </table>
+    </div>
+    <p><code>net:lights.lan</code> is the plugin's sole network capability, and
+    it is still not enough on its own: the daemon additionally checks the URL
+    host against <code>/policy/net/allow_hosts</code> before performing the
+    request. The glob is anchored and <code>*</code> matches exactly one DNS
+    label, so the grant allows <code>lights.lan</code> only. It refuses
+    <code>lights.lan.evil.com</code>, <code>lan</code>, <code>a.b.lan</code>,
+    <code>x.lights.lan</code> with <code>E_CAP</code> (counted in
+    <code>stats.violations</code>). The request goes out as
+    <code>sdk.http("GET", url)</code>. Request kind <code>"net"</code>.
+    answered by the daemon, which resolves DNS and connects itself. The plugin
+    process never opens a socket.</p>
+
+    <h2 id="config">Config as data</h2>
+    <p>The plugin reads its config on every invoke. It reads <code>/plugins/lights/config</code>
+    when present (the documented location), else the durable plugin-owned
+    <code>/plugins/lights/state/config</code>. Room and light ids are never
+    hardcoded. The allowlist is deployment policy:</p>
+<pre><code>ds set /policy/net/allow_hosts --json '["lights.lan"]'
+ds set /plugins/lights/state/config --json \
+  '{"bridge_host":"lights.lan","bridge_port":80,"allow_rooms":["salon"]}'</code></pre>
+<pre><code>{"bridge_host": "lights.lan", "bridge_port": 80, "allow_rooms": ["salon"]}</code></pre>
+    <p>A room outside <code>allow_rooms</code> is refused with <code>E_CAP</code>
+    before any bridge request is made.</p>
+
+    <h2 id="install">Install and invoke</h2>
+    <p>The plugin needs the <code>ds-plugin-py</code> SDK. Install it with pip once
+    published, or from a checkout of the deckstack repository next to this one
+    (<code>../deckstack/plugins-py</code> or <code>$DS_PLUGIN_PY_ROOT</code>
+    overrides):</p>
+<pre><code>pip install ds-plugin-py        # once published
+# or: keep a clone of https://github.com/zamber/deckstack next to this repo
+
+DEST=${XDG_DATA_HOME:-$HOME/.local/share}/deckstack/plugins/lights
+mkdir -p "$DEST"
+cp plugin.py "$DEST/plugin.py"
+python3 make_manifest.py "$DEST/manifest.json"
+
+ds daemon start --device virtual:/tmp/vdev.sock --data-dir /tmp/dsdata</code></pre>
+    <p>Then bind a key (or any topic) to the action and emit it:</p>
+<pre><code>ds bind deck/control/keys.0/down --do \
+  'plugin lights.set {"room":"salon","light":"ceiling","on":true,"brightness":80,"color":"#ff8800"}'
+# trigger the binding with a key press, or over the control socket:
+#   {"op":"emit","topic":"deck/control/keys.0/down"}
+
+ds get /plugins/lights/state/last --json   # last bridge response, recorded by the plugin
+ds get /plugins/lights --json              # {manifest, status, state, stats}</code></pre>
+
+    <h2 id="tests">Tests</h2>
+    <p>Testing is real, not mocked at the plugin boundary:</p>
+<pre><code>python3 tests/run.py     # exit 0 = green</code></pre>
+    <p>The suite boots the real <code>ds-vdev</code> and <code>ds-daemon</code>,
+    installs the plugin, and points it at a fake HueMux bridge
+    (<code>tests/fake_humux.py</code>), a stdlib HTTP server that records every
+    request, so the tests can assert exactly what the plugin asked the bridge
+    to do, including that a refused room never produced a request. The run is
+    hermetic: the suite re-execs itself in a user+mount namespace with a private
+    <code>/etc/hosts</code> mapping <code>lights.lan</code> → 127.0.0.1. It
+    covers manifest schema validation, boot to <code>running</code>,
+    <code>lights.set</code> success and partial args, the <code>allow_rooms</code>
+    refusal, the net glob edge matrix, the <code>/policy/net/allow_hosts</code>
+    layer, params-schema refusals, and cleanup. It needs the prebuilt deckstack
+    binaries (<code>../deckstack/target/debug</code> or <code>$DS_BIN_DIR</code>).</p>
+  </main>
+
+  <footer class="site-footer">
+    deckstack-lights is open source (MIT OR Apache-2.0).
+    <a href="https://github.com/zamber/deckstack-lights">source on GitHub</a> ·
+    <a href="https://zamber.github.io/deckstack/">deckstack</a> ·
+    <a href="https://github.com/zamber/huemux">HueMux</a>
+  </footer>
+</body>
+</html>

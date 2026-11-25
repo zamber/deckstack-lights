@@ -1,9 +1,10 @@
 """Test harness for deckstack-lights: boot the REAL ds-vdev + ds-daemon and drive the
 lights plugin only through the real binaries and the raw NDJSON control socket.
 
-Stdlib only. Pattern follows the umbrella's tests/conformance/plugins harness
-(DS-053): one fresh temp dir per run, XDG_DATA_HOME=<tmp>/xdg so the daemon's plugin
-host scans <tmp>/xdg/deckstack/plugins/, ds-vdev on <tmp>/vdev.sock, then
+Stdlib only. Pattern follows the deckstack repository's
+tests/conformance/plugins harness: one fresh temp dir per run,
+XDG_DATA_HOME=<tmp>/xdg so the daemon's plugin host scans
+<tmp>/xdg/deckstack/plugins/, ds-vdev on <tmp>/vdev.sock, then
 `ds daemon start --device virtual:<sock> --data-dir <tmp>/data`.
 
 Phase-5 invoke surface (bins/ds `plugin` is a later-phase verb, cli.rs LATER_PHASE):
@@ -41,25 +42,23 @@ KILL_TIMEOUT_S = 5
 BINARIES = ("ds", "ds-daemon", "ds-vdev", "ds-vdevctl")
 
 
-def umbrella_root():
-    """The deckstack umbrella checkout that provides the binaries and the SDK."""
-    env = os.environ.get("DS_UMBRELLA")
+def deckstack_root():
+    """The deckstack repository checkout that provides the binaries and the SDK."""
+    env = os.environ.get("DS_DECKSTACK_ROOT")
     if env:
         return Path(env)
     cand = REPO.parent / "deckstack"
     if (cand / "Cargo.toml").is_file():
         return cand
-    for wt in sorted((REPO.parent / "deckstack" / ".worktrees").iterdir()):
-        if (wt / "Cargo.toml").is_file():
-            return wt
-    raise RuntimeError("deckstack umbrella checkout not found next to %s" % REPO)
+    raise RuntimeError("deckstack repository checkout not found next to %s "
+                       "(expected ../deckstack; or set DS_DECKSTACK_ROOT)" % REPO)
 
 
 def bin_dir():
     env = os.environ.get("DS_BIN_DIR")
     if env:
         return Path(env)
-    root = umbrella_root()
+    root = deckstack_root()
     for cand in (root / "target" / "debug", root / "target" / "release"):
         if all((cand / b).is_file() for b in BINARIES):
             return cand
@@ -78,7 +77,7 @@ def ensure_binaries():
     print("building binaries (bounded %ss): %s" % (BUILD_TIMEOUT_S, " ".join(missing)))
     subprocess.run([cargo, "build", "--bin", "ds", "--bin", "ds-daemon",
                     "--bin", "ds-vdev", "--bin", "ds-vdevctl"],
-                   cwd=str(umbrella_root()), timeout=BUILD_TIMEOUT_S, check=True,
+                   cwd=str(deckstack_root()), timeout=BUILD_TIMEOUT_S, check=True,
                    stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     missing = [b for b in BINARIES if not (d / b).is_file()]
     if missing:
@@ -145,7 +144,7 @@ class Ipc:
                 return msg
 
     def hello_auth(self, token):
-        r = self.rpc({"id": 0, "op": "hello", "protocol": 1, "client": "ds-070-lights/1"})
+        r = self.rpc({"id": 0, "op": "hello", "protocol": 1, "client": "deckstack-lights/1"})
         assert r["ok"], r
         r = self.rpc({"id": 1, "op": "auth", "token": token, "scope": "admin"})
         assert r["ok"], r
@@ -200,7 +199,7 @@ def scan_procs(match_cmd=None, under_cwd=None):
 class Stack:
     def __init__(self, bins):
         self.bins = bins
-        self.tmp = Path(tempfile.mkdtemp(prefix="ds-070-lights-"))
+        self.tmp = Path(tempfile.mkdtemp(prefix="ds-lights-"))
         self.xdg = self.tmp / "xdg"
         self.data = self.tmp / "data"
         self.vdev_sock = self.tmp / "vdev.sock"
@@ -234,14 +233,14 @@ class Stack:
         self.vdev = subprocess.Popen(
             [str(self.bins / "ds-vdev"), "--socket", str(self.vdev_sock)],
             stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
-            stdin=subprocess.DEVNULL, cwd=str(umbrella_root()))
+            stdin=subprocess.DEVNULL, cwd=str(deckstack_root()))
         self._wait_for_file(self.vdev_sock, 10, "ds-vdev device socket")
         p = subprocess.run(
             [str(self.bins / "ds"), "--socket", str(self.sock), "--data-dir", str(self.data),
              "daemon", "start", "--device", "virtual:%s" % self.vdev_sock,
              "--data-dir", str(self.data)],
             capture_output=True, text=True, timeout=BOOT_TIMEOUT_S, env=self.env(),
-            cwd=str(umbrella_root()))
+            cwd=str(deckstack_root()))
         if p.returncode != 0:
             raise RuntimeError("ds daemon start failed rc=%d\nstdout: %s\nstderr: %s\ndaemon.log: %s"
                                % (p.returncode, p.stdout, p.stderr, self.read_log()))
@@ -275,7 +274,7 @@ class Stack:
             [str(self.bins / "ds"), "--socket", str(self.sock), "--data-dir", str(self.data)]
             + list(args),
             capture_output=True, text=True, timeout=timeout, env=self.env(),
-            cwd=str(umbrella_root()))
+            cwd=str(deckstack_root()))
 
     def ipc(self):
         return Ipc(self.sock)
@@ -379,7 +378,7 @@ class Stack:
             subprocess.run([str(self.bins / "ds"), "--socket", str(self.sock),
                             "--data-dir", str(self.data), "daemon", "stop"],
                            capture_output=True, text=True, timeout=OP_TIMEOUT_S,
-                           env=self.env(), cwd=str(umbrella_root()))
+                           env=self.env(), cwd=str(deckstack_root()))
         except Exception:
             pass
         targets = []

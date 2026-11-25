@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""deckstack-lights — the lights.lan integration as a deckstack plugin (ticket DS-070).
+"""deckstack-lights — the lights.lan integration as a deckstack plugin.
 
 One OS process speaking the plugin wire protocol (docs/contracts/plugins.md §1) via
 the ds-plugin-py SDK. It exposes exactly one action:
@@ -23,8 +23,8 @@ plugin-owned ``/plugins/lights/state/config`` —
 Note on the bridge API: the daemon's mediated fetch currently performs plain-http
 GET/HEAD only (crates/ds-daemon/src/plugins/host.rs ``http_fetch``), so lights.set
 maps the desired state onto the query string of ``GET /api/lights/set?...`` against
-the HueMux bridge. Extending the mediated fetch to POST/PUT is a host-side change
-(later ticket), not something this plugin works around.
+the HueMux bridge. Extending the mediated fetch to POST/PUT is a host-side change,
+not something this plugin works around.
 """
 
 import json
@@ -61,7 +61,8 @@ import ds_plugin_py as sdk  # noqa: E402
 
 PLUGIN_ID = "lights"
 #: Config locations, in precedence order. `/plugins/lights/config` is the documented
-#: location (ticket DS-070, docs/80-integrations.md) and is honoured when present.
+#: location (docs/80-integrations.md in the deckstack repository) and is honoured
+#: when present.
 #: The host's per-invoke `refresh_state()` replaces `/plugins/<id>` wholesale and
 #: preserves only the `state` subtree, so in this tree `/plugins/lights/state/config`
 #: is the durable location (reported upstream as a host gap). Either may hold
@@ -217,9 +218,9 @@ MANIFEST = {
     "id": PLUGIN_ID,
     "name": "lights.lan bridge (HueMux)",
     "version": "0.1.0",
-    "description": "lights.lan integration (DS-070): lights.set {room, light, on, "
-                   "brightness, color} over host-mediated HTTP; the only network "
-                   "capability is net:lights.lan; no scenes/presets shipped.",
+    "description": "lights.set {room, light, on, brightness, color} on the lights.lan "
+                   "HueMux bridge over host-mediated HTTP; the only network capability "
+                   "is net:lights.lan.",
     # state.read: read /plugins/lights/config; state.write: record the last result
     # under /plugins/lights/state; net:lights.lan: the sole net grant (S4/M5).
     "capabilities": ["state.read", "state.write", "net:lights.lan"],

@@ -7,8 +7,8 @@ manifest is generated from the same ``MANIFEST`` dict ``plugin.py`` serves, plus
 launch fields:
 
 - ``command``: ``["/usr/bin/python3", "plugin.py"]`` — argv-only, never a shell;
-- ``fs_roots``: the umbrella ``plugins-py/`` directory containing ``ds_plugin_py``
-  (empty when the SDK is pip-installed and already importable);
+- ``fs_roots``: the deckstack repository's ``plugins-py/`` directory containing
+  ``ds_plugin_py`` (empty when the SDK is pip-installed and already importable);
 - ``resources``: the schema defaults, spelled out.
 
 Usage:

@@ -4,7 +4,7 @@
 Runs the lights plugin through the REAL daemon end-to-end on ds-vdev against a fake
 HueMux bridge (tests/fake_humux.py):
 
-  1. the canonical manifest.json validates against the umbrella's
+  1. the canonical manifest.json validates against the deckstack repository's
      schemas/plugin-manifest.json;
   2. ds-vdev + ds-daemon boot on a fresh temp dir; the plugin installs into
      $XDG_DATA_HOME/deckstack/plugins/lights/ (phase-5 install: copy + generated
@@ -28,7 +28,7 @@ hermetic, run.py re-executes itself inside `unshare --user --map-root-user --mou
 (the fake HueMux's address). If lights.lan already resolves to 127.0.0.1, no
 namespace is needed.
 
-Usage:  cd /home/catwars/repos/deckstack-lights && python3 tests/run.py [--verbose]
+Usage:  python3 tests/run.py [--verbose]
 Exit 0 = all green. A transcript of commands + output is written to tests/last-run.txt.
 """
 
@@ -55,7 +55,7 @@ from harness import (  # noqa: E402
     Stack,
     bin_dir,
     ensure_binaries,
-    umbrella_root,
+    deckstack_root,
 )
 
 VERBOSE = "--verbose" in sys.argv
@@ -184,11 +184,11 @@ def check_manifest(manifest, schema):
 
 
 def validate_manifest(rec):
-    schema = json.loads((umbrella_root() / "schemas" / "plugin-manifest.json").read_text())
+    schema = json.loads((deckstack_root() / "schemas" / "plugin-manifest.json").read_text())
     manifest = json.loads((REPO / "manifest.json").read_text())
     problems = check_manifest(manifest, schema)
     try:
-        import jsonschema  # optional, when the umbrella venv is on the path
+        import jsonschema  # optional, when the deckstack venv is on the path
         jsonschema.validate(manifest, schema)
         rec.note("PASS  manifest.json validates against schemas/plugin-manifest.json "
                  "(jsonschema draft 2020-12)")
@@ -199,7 +199,7 @@ def validate_manifest(rec):
                  "(stdlib structural check; jsonschema not installed)")
     except Exception as e:
         raise AssertionError("jsonschema validation failed: %s" % e)
-    # the ticket's capability requirement: net:lights.lan is the ONLY net grant
+    # the capability requirement: net:lights.lan is the ONLY net grant
     net_caps = [c for c in manifest["capabilities"] if c.startswith("net:")]
     assert net_caps == ["net:lights.lan"], net_caps
     assert manifest["id"] == "lights" and [a["id"] for a in manifest["actions"]] == ["set"]
@@ -297,21 +297,21 @@ def run_suite(rec):
         CFG = {"bridge_host": "lights.lan", "bridge_port": fake.port,
                "allow_rooms": ["salon", "kitchen"]}
 
-        def step_ticket_config_path():
+        def step_config_path():
             # the documented config path /plugins/lights/config is honoured when
             # present (the host wipes it on the next per-invoke refresh, so this
             # single invoke is the proof; the durable path is state/config below)
             set_config(CFG, path="/plugins/lights/config")
             args = {"room": "salon", "light": "ceiling", "on": True}
-            invoke("app/lights/ticket-path", args)
+            invoke("app/lights/config-path", args)
             last = stack.wait_last(
                 lambda v: v.get("args") == args and v.get("http_status") == 200,
-                what="ticket-path result")
+                what="config-path result")
             assert "refused" not in last, last
             rec.note("  /plugins/lights/config honoured: invoke succeeded via it")
 
         check("documented config path /plugins/lights/config is honoured when present",
-              step_ticket_config_path)
+              step_config_path)
 
         def step_set_success():
             set_config(CFG)

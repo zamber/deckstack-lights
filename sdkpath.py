@@ -1,14 +1,13 @@
-"""Locate the ds-plugin-py SDK (the ``plugins-py/`` subtree of the deckstack umbrella).
+"""Locate the ds-plugin-py SDK (the ``plugins-py/`` subtree of the deckstack repository).
 
-The lights repo is developed as its own repository from day one (repos.toml,
-docs/50-repo-topology.md), so it does not vendor the SDK: the plugin imports
-``ds_plugin_py`` either from a pip-installed ``ds-plugin-py`` wheel (once published)
-or from the umbrella checkout that sits next to this repo. Resolution order:
+This repository does not vendor the SDK: the plugin imports ``ds_plugin_py``
+either from a pip-installed ``ds-plugin-py`` package (once published) or from a
+checkout of the deckstack repository that sits next to this one
+(https://github.com/zamber/deckstack). Resolution order:
 
 1. ``$DS_PLUGIN_PY_ROOT`` — explicit override;
 2. ``import ds_plugin_py`` — already importable (pip-installed);
-3. ``../deckstack/plugins-py`` — sibling umbrella checkout;
-4. ``../deckstack/.worktrees/*/plugins-py`` — any umbrella worktree.
+3. ``../deckstack/plugins-py`` — sibling deckstack repository checkout.
 
 ``find_sdk_root()`` returns the directory that contains the ``ds_plugin_py``
 package, or ``None`` when the SDK is already importable (no fs_root needed).
@@ -29,10 +28,6 @@ def candidates():
         yield Path(env)
     here = Path(__file__).resolve().parent
     yield here.parent / "deckstack" / "plugins-py"
-    worktrees = here.parent / "deckstack" / ".worktrees"
-    if worktrees.is_dir():
-        for wt in sorted(worktrees.iterdir()):
-            yield wt / "plugins-py"
 
 
 def sdk_importable():
@@ -62,8 +57,8 @@ def ensure_importable():
         sys.path.insert(0, str(root))
     if not sdk_importable():
         raise RuntimeError(
-            "ds-plugin-py SDK not found; set DS_PLUGIN_PY_ROOT to the umbrella's "
-            "plugins-py/ directory (searched: %s)"
+            "ds-plugin-py SDK not found; set DS_PLUGIN_PY_ROOT to the deckstack "
+            "repository's plugins-py/ directory (searched: %s)"
             % ", ".join(str(c) for c in candidates())
         )
     return root
